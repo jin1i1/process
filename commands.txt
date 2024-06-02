@@ -1,0 +1,7 @@
+echo HelloWorld
+dummy
+gcd 24 36
+prime 100
+sum 1000
+echo Test ; dummy ; gcd 48 64 ; &prime 100 ; sum 5000
+&echo Background ; &gcd 9 3
