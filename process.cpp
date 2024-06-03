@@ -1,6 +1,6 @@
-//2-1
-//2-2
-//2-3
+//2-1 O
+//2-2 O
+//2-3 O
 
 
 
@@ -299,139 +299,139 @@
 
 //2-3
 
-#include <iostream>
-#include <thread>
-#include <vector>
-#include <string>
-#include <fstream>
-#include <sstream>
-#include <chrono>
-#include <queue>
-#include <mutex>
-
-using namespace std;
-using namespace chrono;
-
-mutex mtx;
-bool shell_done = false; // shell 함수가 종료되었는지 여부를 나타내는 플래그
-
-struct Process {
-    int pid;
-    string command;
-    vector<string> args;
-    bool promoted = false;
-    bool is_background = false; // 백그라운드 명령어 여부
-};
-
-queue<Process> DQ;
-queue<Process> BQ; // 백그라운드 큐
-
-vector<string> parse(const string& command) {
-    vector<string> tokens;
-    istringstream stream(command);
-    string token;
-    while (getline(stream, token, ' ')) {
-        tokens.push_back(token);
-    }
-    return tokens;
-}
-
-void exec(const Process& p) {
-    if (p.command == "dummy") {
-        // Do nothing
-    }
-    else if (p.command.rfind("echo", 0) == 0) {
-        cout << p.command.substr(5) << endl;
-    }
-    else if (p.command.rfind("gcd", 0) == 0) {
-        istringstream iss(p.command.substr(4));
-        int x, y;
-        iss >> x >> y;
-        while (y != 0) {
-            int temp = y;
-            y = x % y;
-            x = temp;
-        }
-        cout << "GCD: " << x << endl;
-    }
-    else if (p.command.rfind("prime", 0) == 0) {
-        int limit = stoi(p.command.substr(6));
-        vector<bool> is_prime(limit + 1, true);
-        is_prime[0] = is_prime[1] = false;
-        for (int i = 2; i * i <= limit; ++i) {
-            if (is_prime[i]) {
-                for (int j = i * i; j <= limit; j += i) {
-                    is_prime[j] = false;
-                }
-            }
-        }
-        int count = count_if(is_prime.begin(), is_prime.end(), [](bool p) { return p; });
-        cout << "Prime count: " << count << endl;
-    }
-    else if (p.command.rfind("sum", 0) == 0) {
-        int limit = stoi(p.command.substr(4));
-        int sum = (limit * (limit + 1)) / 2;
-        cout << "Sum: " << sum % 1000000 << endl;
-    }
-}
-
-void shell() {
-    ifstream commands("commands.txt");
-    string line;
-    int pidCounter = 0;
-    while (getline(commands, line)) {
-        istringstream ss(line);
-        string token;
-        while (getline(ss, token, ';')) {
-            Process p;
-            p.pid = pidCounter++;
-            p.command = token;
-            if (token[0] == '&') {
-                p.is_background = true;
-                p.command = token.substr(1);
-            }
-            lock_guard<mutex> lock(mtx);
-            if (p.is_background) {
-                BQ.push(p);
-            }
-            else {
-                DQ.push(p);
-            }
-        }
-        this_thread::sleep_for(seconds(1));
-    }
-    lock_guard<mutex> lock(mtx);
-    shell_done = true; // shell 함수가 종료됨을 표시
-}
-
-void execute() {
-    while (true) {
-        this_thread::sleep_for(seconds(1));
-        lock_guard<mutex> lock(mtx);
-        if (!DQ.empty()) {
-            Process p = DQ.front();
-            DQ.pop();
-            cout << "Executing: " << p.command << endl;
-            exec(p);
-        }
-        if (!BQ.empty()) {
-            Process p = BQ.front();
-            BQ.pop();
-            thread t(exec, p);
-            t.detach();
-            cout << "Executing in background: " << p.command << endl;
-        }
-        if (DQ.empty() && BQ.empty() && shell_done) {
-            break; // 큐가 모두 비어있고 shell이 종료된 경우 루프 종료
-        }
-    }
-}
-
-int main() {
-    thread shellThread(shell);
-    thread executeThread(execute);
-
-    shellThread.join();
-    executeThread.join();
-    return 0;
-}
+//#include <iostream>
+//#include <thread>
+//#include <vector>
+//#include <string>
+//#include <fstream>
+//#include <sstream>
+//#include <chrono>
+//#include <queue>
+//#include <mutex>
+//
+//using namespace std;
+//using namespace chrono;
+//
+//mutex mtx;
+//bool shell_done = false; // shell 함수가 종료되었는지 여부를 나타내는 플래그
+//
+//struct Process {
+//    int pid;
+//    string command;
+//    vector<string> args;
+//    bool promoted = false;
+//    bool is_background = false; // 백그라운드 명령어 여부
+//};
+//
+//queue<Process> DQ;
+//queue<Process> BQ; // 백그라운드 큐
+//
+//vector<string> parse(const string& command) {
+//    vector<string> tokens;
+//    istringstream stream(command);
+//    string token;
+//    while (getline(stream, token, ' ')) {
+//        tokens.push_back(token);
+//    }
+//    return tokens;
+//}
+//
+//void exec(const Process& p) {
+//    if (p.command == "dummy") {
+//        // Do nothing
+//    }
+//    else if (p.command.rfind("echo", 0) == 0) {
+//        cout << p.command.substr(5) << endl;
+//    }
+//    else if (p.command.rfind("gcd", 0) == 0) {
+//        istringstream iss(p.command.substr(4));
+//        int x, y;
+//        iss >> x >> y;
+//        while (y != 0) {
+//            int temp = y;
+//            y = x % y;
+//            x = temp;
+//        }
+//        cout << "GCD: " << x << endl;
+//    }
+//    else if (p.command.rfind("prime", 0) == 0) {
+//        int limit = stoi(p.command.substr(6));
+//        vector<bool> is_prime(limit + 1, true);
+//        is_prime[0] = is_prime[1] = false;
+//        for (int i = 2; i * i <= limit; ++i) {
+//            if (is_prime[i]) {
+//                for (int j = i * i; j <= limit; j += i) {
+//                    is_prime[j] = false;
+//                }
+//            }
+//        }
+//        int count = count_if(is_prime.begin(), is_prime.end(), [](bool p) { return p; });
+//        cout << "Prime count: " << count << endl;
+//    }
+//    else if (p.command.rfind("sum", 0) == 0) {
+//        int limit = stoi(p.command.substr(4));
+//        int sum = (limit * (limit + 1)) / 2;
+//        cout << "Sum: " << sum % 1000000 << endl;
+//    }
+//}
+//
+//void shell() {
+//    ifstream commands("commands.txt");
+//    string line;
+//    int pidCounter = 0;
+//    while (getline(commands, line)) {
+//        istringstream ss(line);
+//        string token;
+//        while (getline(ss, token, ';')) {
+//            Process p;
+//            p.pid = pidCounter++;
+//            p.command = token;
+//            if (token[0] == '&') {
+//                p.is_background = true;
+//                p.command = token.substr(1);
+//            }
+//            lock_guard<mutex> lock(mtx);
+//            if (p.is_background) {
+//                BQ.push(p);
+//            }
+//            else {
+//                DQ.push(p);
+//            }
+//        }
+//        this_thread::sleep_for(seconds(1));
+//    }
+//    lock_guard<mutex> lock(mtx);
+//    shell_done = true; // shell 함수가 종료됨을 표시
+//}
+//
+//void execute() {
+//    while (true) {
+//        this_thread::sleep_for(seconds(1));
+//        lock_guard<mutex> lock(mtx);
+//        if (!DQ.empty()) {
+//            Process p = DQ.front();
+//            DQ.pop();
+//            cout << "Executing: " << p.command << endl;
+//            exec(p);
+//        }
+//        if (!BQ.empty()) {
+//            Process p = BQ.front();
+//            BQ.pop();
+//            thread t(exec, p);
+//            t.detach();
+//            cout << "Executing in background: " << p.command << endl;
+//        }
+//        if (DQ.empty() && BQ.empty() && shell_done) {
+//            break; // 큐가 모두 비어있고 shell이 종료된 경우 루프 종료
+//        }
+//    }
+//}
+//
+//int main() {
+//    thread shellThread(shell);
+//    thread executeThread(execute);
+//
+//    shellThread.join();
+//    executeThread.join();
+//    return 0;
+//}
